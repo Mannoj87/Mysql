@@ -23,3 +23,5 @@ Result:
 
 ### Modified Changes Rebuilt the RPM and Uploaded in above rpm 
 https://github.com/Mannoj87/Mysql/blob/master/Mysql_Failover/mysql-utilities-1.6.5-1.el7.noarch.rpm
+
+This rpm Requires: mysql-connector-python >= 2.0.0 as a dependency package. You may download from https://dev.mysql.com/downloads/connector/python/
