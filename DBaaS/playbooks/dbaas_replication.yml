@@ -1,0 +1,6 @@
+---
+- hosts: all
+  roles:
+      - role: dbaas/mysql/replication
+        master_ip: "{{master_ip}}"
+        slave_ip: "{{slave_ip}}"

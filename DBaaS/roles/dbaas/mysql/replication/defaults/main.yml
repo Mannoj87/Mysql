@@ -1,0 +1,4 @@
+mysql_replicator_user: replica_usr
+mysql_replicator_password: usrEp1pass
+mysql_conf_dir: /mysql/conf
+mysql_config_file: "{{ mysql_conf_dir }}/my.cnf"

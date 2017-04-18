@@ -1,0 +1,104 @@
+# GRANT ALL PRIVILEGES for login_user and mysql_replicator_user FROM localhost and %
+
+
+- name: create replicator user
+  become: true
+  mysql_user:
+    login_host: "{{ master_ip }}"
+    login_user: "dbadminroot"
+    login_password: "m001@dh@@r"
+    name: "{{ mysql_replicator_user }}"
+    host: "{{ slave_ip }}"
+    password: "{{ mysql_replicator_password }}"
+    priv: "*.*:REPLICATION SLAVE"
+    state: present
+
+- name: get the current master servers replication status
+  mysql_replication: 
+    mode: getmaster
+    login_host: "{{ master_ip }}"
+    login_user: "dbadminroot"
+    login_password: "m001@dh@@r"
+  register: repl_stat
+
+- name: Replace RW to RO mode
+  become: true
+  replace: 
+    dest: "{{mysql_config_file}}"
+    regexp: 'read-only=0'
+    replace: 'read-only=1'
+    backup: yes
+
+- name: Set RO globally on Slave
+  mysql_variables:
+    login_host: "{{ slave_ip }}"
+    login_user: "dbadminroot"
+    login_password: "m001@dh@@r"
+    variable: read_only
+    value: 1
+
+
+- name: Start Replication
+  become: true
+  mysql_replication:
+    mode: stopslave
+    login_host: "{{ slave_ip }}"
+    login_user: "dbadminroot"
+    login_password: "m001@dh@@r"
+
+- name: Start Replication
+  become: true
+  mysql_replication:
+    mode: resetslave
+    login_host: "{{ slave_ip }}"
+    login_user: "dbadminroot"
+    login_password: "m001@dh@@r"
+
+- name: Setup Replication
+  become: true
+  mysql_replication:
+     login_host: "{{ slave_ip }}"
+     login_user: "dbadminroot"
+     login_password: "m001@dh@@r"
+     mode: changemaster
+     master_host: "{{ master_ip }}"
+     master_log_file: "{{ repl_stat.File }}"
+     master_log_pos: "{{ repl_stat.Position }}"
+     master_user: "{{ mysql_replicator_user }}"
+     master_password: "{{ mysql_replicator_password }}"
+  ignore_errors: True
+
+- name: Start Replication
+  become: true
+  mysql_replication:
+    mode: startslave
+    login_host: "{{ slave_ip }}"
+    login_user: "dbadminroot"
+    login_password: "m001@dh@@r"
+
+- name: Check slave replication status. SBM
+  become: true
+  shell: 'mysql -e "show slave status \G"  | grep -i "Seconds_Behind_Master:" '
+  register: Slave_SBM
+
+- name: Check slave replication status. IO
+  become: true
+  shell: 'mysql -e "show slave status \G"  | grep -i "Slave_IO_Running:" '
+  register: Slave_IO
+
+- name: Check slave replication status. SQL
+  become: true
+  shell: 'mysql -e "show slave status \G"  | grep -i "Slave_SQL_Running:" '
+  register: Slave_SQL
+
+- fail:
+    msg: "Slave IO is not running"
+  when: '"Yes" not in "{{ Slave_IO.stdout }}"'
+
+- fail:
+    msg: "Slave SQL is not running"
+  when: '"Yes" not in "{{ Slave_SQL.stdout }}"'
+
+- fail:
+    msg: "Not uptodate in sync with Master"
+  when: '"Seconds_Behind_Master: 0" not in "{{ Slave_SBM.stdout }}"'
