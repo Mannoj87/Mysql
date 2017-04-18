@@ -21,3 +21,4 @@ Result:
    - After automatic failover
    - Check Newly elected Master read_only variable using (show variables like '%read_only%';) it should be OFF
 
+### Modified Changes Rebuilt the RPM and Uploaded in above rpm https://github.com/Mannoj87/Mysql/blob/master/Mysql_Failover/mysql-utilities-1.6.5-1.el7.noarch.rpm
