@@ -1,4 +1,4 @@
-# GRANT ALL PRIVILEGES for login_user and mysql_replicator_user FROM localhost and %
+# GRANT ALL PRIVILEGES for login_user and mysql_replicator_user FROM localhost and % WITH GRANT OPTION 
 
 
 - name: create replicator user
