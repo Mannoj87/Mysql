@@ -1,0 +1,64 @@
+
+[mysql]
+
+# CLIENT #
+port = {{ mysql_port }}
+socket = {{ mysql_socket_file }}
+
+[mysqld]
+
+# GENERAL #
+server-id= {{ ansible_all_ipv4_addresses[0].split('.')[1:4] | join('') }}
+user = mysql
+default-storage-engine = InnoDB
+socket = {{ mysql_socket_file }}
+pid-file = {{ mysql_pid_file }}
+port = {{ mysql_port }}
+
+# MyISAM #
+key-buffer-size = 32M
+myisam-recover = FORCE,BACKUP
+
+# SAFETY #
+max-allowed-packet = 16M
+max-connect-errors = 1000000
+
+# DATA STORAGE #
+datadir = {{ mysql_data_dir }}
+
+# BINARY LOGGING #
+log-bin = {{ mysql_data_dir }}/mysql-bin
+expire-logs-days = 14
+sync-binlog = 1
+binlog_format=MIXED
+log-slave-updates=1
+read-only=0
+
+# CACHES AND LIMITS #
+tmp-table-size = 32M
+max-heap-table-size = 32M
+query-cache-type = 0
+query-cache-size = 0
+max-connections = 500
+thread-cache-size = 50
+open-files-limit = 65535
+table-definition-cache = 1024
+table-open-cache = 2048
+
+# INNODB #
+innodb-flush-method = O_DIRECT
+innodb-log-files-in-group = 2
+innodb-log-file-size = 128M
+innodb-flush-log-at-trx-commit = 1
+innodb-file-per-table = 1
+innodb-buffer-pool-size = {{ (ansible_memory_mb.real.total * 0.60)|round|int}}M
+
+
+# LOGGING #
+log-error = {{ mysql_error_log_file }}
+log-queries-not-using-indexes = 1
+slow-query-log = 1
+slow-query-log-file = {{ mysql_slow_query_file }}
+long_query_time=1
+
+

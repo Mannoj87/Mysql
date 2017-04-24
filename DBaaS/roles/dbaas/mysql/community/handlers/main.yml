@@ -1,0 +1,35 @@
+---
+- name: Restore SELinux fcontext
+  become: true
+  become_user: root
+  shell: 'restorecon -R {{ mysql_base_dir }}'
+
+- name: Reload Systemd daemon
+  become: true
+  become_user: root
+  shell: 'systemctl daemon-reload'
+
+- name: Stop Mysql
+  become: true
+  shell: 'mysqladmin --socket="{{ mysql_socket_file }}" shutdown'
+
+- name: Precheck Mysql Start
+  become: true
+  shell: 'ts="`date +%Y-%m-%d-%H%M%S`"; mv {{ mysql_error_log_file }} {{ mysql_error_log_file }}.START.$ts'
+
+- name: Start Mysql
+  become: true
+  shell: 'mysqld_safe --defaults-file="{{ mysql_config_file }}" &'
+
+- name: Postcheck Mysql Start
+  become: true
+  command: grep -i "ready for connections" "{{ mysql_error_log_file }}"
+  register: cmdlngrep
+  failed_when: "cmdlngrep.rc != 0" 
+
+- name: Check Mysql
+  become: true
+  become_user: root
+  shell: 'mysql < "{{ mysql_first_check_script }}"' 
+ 
+ 

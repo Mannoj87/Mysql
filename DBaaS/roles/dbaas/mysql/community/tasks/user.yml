@@ -1,0 +1,44 @@
+---
+- name: Create MySQL user
+  become: true
+  become_user: root
+  mysql_user:
+    login_host: 127.0.0.1
+    name: '{{ item.name }}'
+    host: '{{ item.host }}'
+    password: '{{ item.pass }}'
+    priv: '{{ item.priv }}'
+    state: present
+  with_items: '{{ mysql_users }}'
+  when: mysql_users is defined
+
+- name: Create MySQL user
+  become: true
+  become_user: root
+  mysql_user:
+    login_host: 127.0.0.1
+    name: '{{ item.name }}'
+    host: "localhost"
+    password: '{{ item.pass }}'
+    priv: '{{ item.priv }}'
+    state: present
+  with_items: '{{ mysql_users }}'
+  when: mysql_users is defined
+
+- name: Create MySQL user
+  become: true
+  become_user: root
+  mysql_user:
+    login_host: 127.0.0.1
+    name: '{{ mysql_admin_user }}'
+    host: '{{ item.host }}'
+    password: '{{ mysql_admin_password }}'
+    priv: '{{ item.priv }}'
+    state: present
+  with_items: '{{ mysql_users }}'
+  when: mysql_admin_user is defined
+
+- name: Remove anonymous users
+  become: true
+  become_user: root
+  command: mysql -e "delete  from mysql.user where password='' or user='';"

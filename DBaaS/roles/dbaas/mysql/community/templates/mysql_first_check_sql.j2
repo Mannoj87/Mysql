@@ -1,0 +1,6 @@
+create database if not exists master_check;
+use master_check;
+create table if not exists first_check (id INT UNSIGNED NOT NULL AUTO_INCREMENT, dated TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (id));
+select sleep (5);
+insert into first_check values ();
+

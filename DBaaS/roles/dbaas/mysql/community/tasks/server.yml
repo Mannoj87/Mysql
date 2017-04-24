@@ -1,0 +1,88 @@
+---
+- name: Install MySQL server default Env
+  become: true
+  yum:
+    name: '{{ item }}'
+    state: present
+  with_items:
+  - mysql-community-server
+  - MySQL-python
+
+- name: Prepare MySQL  directories
+  become: true
+  file:
+    path: '{{ item }}'
+    state: directory
+    owner: mysql 
+    group: mysql 
+    setype: mysqld_db_t
+    mode: 0770
+    recurse: yes
+  with_items:
+  - "{{ mysql_base_dir }}"
+  - "{{ mysql_data_dir }}"
+  - "{{ mysql_conf_dir }}"
+  - "{{ mysql_log_dir }}"
+  - "{{ mysql_socket_dir }}"
+  - "{{ mysql_pid_dir }}"
+  - "{{ mysql_scripts_dir }}"
+
+
+
+##TODO Use action sefcontext available in Ansible 2.2
+- name: Configure SELinux fcontext
+  become: true
+  lineinfile: 
+    dest: /etc/selinux/targeted/contexts/files/file_contexts.local
+    regexp: '^{{ mysql_base_dir }}(/.*)?'
+    line: '{{ mysql_base_dir }}(/.*)?    system_u:object_r:mysqld_db_t:s0'
+  notify: Restore SELinux fcontext
+
+
+- name: Configure MySQL
+  become: true
+  template:
+    src: my.cnf.j2
+    dest: "{{ mysql_config_file }}"
+
+- name: Configure Suppporting files Scripts
+  become: true
+  template:
+    src: mysql_first_check_sql.j2
+    dest: "{{ mysql_first_check_script }}"
+
+- name: Install Mysql to DBaaS Env
+  become: true
+  shell: 'mysql_install_db --defaults-file="{{ mysql_config_file }}"'
+
+- name: Apply Firewall Rules For Mysql
+  become: true
+  shell: 'firewall-cmd --add-port=3306/tcp --permanent ; firewall-cmd --reload; '
+
+- name: Start MySQL server
+  include: mysql_start.yml
+
+- name: Stop MySQL server
+  include: mysql_stop.yml
+
+- name: Setup MySQL server
+  include: mysql_start.yml
+
+- name: Configure Suppporting files Client conf
+  become: true
+  template:
+    src: my.client.cnf.j2
+    dest: "{{ mysql_client_cnf }}"
+
+
+- name: Configure Suppporting files to Start Mysql
+  become: true
+  template:
+    src: mysql-start.sh.j2
+    dest: "{{ mysql_start_script }}"
+
+- name: Configure Suppporting files to Stop Mysql
+  become: true
+  template:
+    src: mysql-stop.sh.j2
+    dest: "{{ mysql_stop_script }}"

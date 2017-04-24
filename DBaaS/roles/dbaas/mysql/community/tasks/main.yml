@@ -1,0 +1,9 @@
+---
+## ENSURE THE REPO IS CONFIGURED TO PULL YUM INSTALLATIONS
+
+- name: Setup MySQL server
+  include: server.yml
+
+- name: Setup MySQL users
+  include: user.yml
+

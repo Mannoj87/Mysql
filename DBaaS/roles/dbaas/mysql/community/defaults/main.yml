@@ -1,0 +1,50 @@
+---
+repo_act_key: abc
+repo_org: xyz
+mysql_localrepo: false
+
+mysql_base_dir: /mysql
+mysql_data_dir: /mysql/data
+mysql_conf_dir: /mysql/conf
+mysql_socket_dir: /mysql/socket
+mysql_pid_dir: /mysql/pid 
+mysql_log_dir: /mysql/log
+
+mysql_config_file: "{{ mysql_conf_dir }}/my.cnf"
+mysql_socket_file: "{{ mysql_socket_dir }}/mysql.sock"
+mysql_pid_file: "{{ mysql_pid_dir }}/mysql.pid"
+mysql_error_log_file: "{{ mysql_log_dir }}/mysql-error.log"
+mysql_slow_query_file: "{{ mysql_log_dir }}/mysql-slow-query.log"
+mysql_replication: false
+mysql_port: 3306
+
+mysql_client_cnf: /root/.my.cnf
+
+mysql_scripts_dir: /mysql/scripts
+mysql_first_check_script: "{{ mysql_scripts_dir }}/mysql-master-first-check.sql"
+
+mysql_start_script:  "{{ mysql_scripts_dir }}/mysql-start.sh"
+mysql_stop_script: "{{ mysql_scripts_dir }}/mysql-stop.sh"
+
+mysql_master: false
+mysql_repl_user: repl
+mysql_repl_pass: password
+mysql_repl_priv: '*.*:REPLICATION SLAVE'
+
+mysql_cert_dir: /etc/mysql-cert
+mysql_ssl: false
+mysql_ssl_ca_file: ca-cert.pem
+mysql_ssl_cert_file: mysql-cert.pem
+mysql_ssl_key_file: mysql-key.pem
+mysql_users: 
+- name: admin_user
+  pass: 'admin_user_pwd'
+  host: '%'
+  priv: '*.*:ALL,GRANT'
+
+mysql_dba_user: admin_user 
+mysql_dba_password: 'admin_user'
+
+dns:
+- zone: localworld.com
+  name: 

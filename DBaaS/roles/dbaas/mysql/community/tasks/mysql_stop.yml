@@ -1,0 +1,9 @@
+- name: Stop Mysql
+  become: true
+  shell: 'mysqladmin --socket="{{ mysql_socket_file }}" shutdown'
+
+#- name: Check Mysql Stopped
+#  become: true
+#   path: "{{ mysql_pid_file }}"
+#    register: pid_result
+#  failed_when: pid_result.exists == True

@@ -1,0 +1,26 @@
+---
+- name: Log Err Log
+  become: true
+  file: path={{ mysql_error_log_file }} state=touch owner=mysql
+
+- name: Precheck Mysql Start
+  become: true
+  shell: 'ts="`date +%Y-%m-%d-%H%M%S`"; mv {{ mysql_error_log_file }} {{ mysql_error_log_file }}.START.$ts ; '
+
+- name: Log Err Log
+  become: true
+  file: path={{ mysql_error_log_file }} state=touch owner=mysql
+
+- name: Start Mysql
+  become: true
+  shell: 'mysqld_safe --defaults-file="{{ mysql_config_file }}" &'
+
+- name: Postcheck Mysql Start
+  become: true
+  command: grep -i "ready for connections" "{{ mysql_error_log_file }}"
+  register: cmdlngrep
+  failed_when: "cmdlngrep.rc != 0"
+
+- name: Postcheck Mysql Start
+  become: true
+  shell: 'mysql -uroot --socket="{{ mysql_socket_file }}" < "{{ mysql_first_check_script }}"'
